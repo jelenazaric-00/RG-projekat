@@ -21,10 +21,10 @@ B grupa: `Parallax mapping` , `SSAO`
 
 `WASD` - pomeranje kamere
 
-`STRELICE` - pomeranje brodica
+`STRELICE` - pomeranje brodića
 
 `B` - Blin-Phong on/off
 
 `Q` - SSAO
 
-#### Video sa demonstracijom : https://www.youtube.com/watch?v=vHl_1NF1Occ&ab_channel=JelenaZaric
+#### Video sa demonstracijom : https://youtu.be/3eN8xEPIGh0
