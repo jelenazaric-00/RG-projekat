@@ -3,7 +3,7 @@ Projekat za kurs Računarska grafika
 
 ## Krstarenje uz društvo delfina
 
-Pridružite nam se i uživajte u jedinstvenom iskustvu koje pružamo-plovite oko zaita posebnog svetionika-njegova revolucionarna tehnologija koristi pulsirajucu plavu svetlost da doziva delfine u migraciji u svojoj blizini i omogucava vam da se približite ovim životinjama kao nikada pre. Krstarenje ima i opasnost: morate se paziti tektonske ploce u vašoj blizini koja se kroz maglu ne vidi.
+Pridružite nam se i uživajte u jedinstvenom iskustvu koje pružamo-plovite oko zaista posebnog svetionika-njegova revolucionarna tehnologija koristi pulsirajucu plavu svetlost da doziva delfine u migraciji u svojoj blizini i omogucava vam da se približite ovim životinjama kao nikada pre. Krstarenje ima i opasnost: morate se paziti tektonske ploče u svojoj blizini koja se kroz maglu ne vidi.
 
 ### Putovanje obezbedile
 
@@ -13,17 +13,17 @@ Pridružite nam se i uživajte u jedinstvenom iskustvu koje pružamo-plovite oko
 
 ### Grupe:
 
-A grupa: `Skybox` , `Instancing`
+A grupa: `Skybox` - *Jelena* , `Instancing` - *Andrijana*
 
-B grupa: `Parallax mapping` , `SSAO`
+B grupa: `Parallax mapping` - *Jelena* , `SSAO` - *Andrijana*
 
 ### Komande:
 
 `WASD` - pomeranje kamere
 
-`STRELICE` - pomeranje brodića
+`Strelice` - pomeranje brodića
 
-`B` - Blin-Phong on/off
+`B` - Blinn-Phong on/off
 
 `Q` - SSAO
 
