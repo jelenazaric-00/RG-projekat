@@ -105,6 +105,10 @@ int main(){
 
     //parallax mapping
     Shader parallaxShader("resources/shaders/parallaxMapping.vs", "resources/shaders/parallaxMapping.fs");
+    
+    //normal mapping
+    Shader normalShader("resources/shaders/normal_mapping.vs", "resources/shaders/normal_mapping.fs");
+
 
     // set up vertex data (and buffer(s)) and configure vertex attrib
     float transparentVertices[] = {
@@ -231,6 +235,10 @@ int main(){
     parallaxShader.setInt("diffuseMapP", 0);
     parallaxShader.setInt("normalMap", 1);
     parallaxShader.setInt("heightMap", 2);
+    
+    normalShader.use();
+    normalShader.setInt("diffuseMapP", 0);
+    normalShader.setInt("normalMap", 1);
 
     // backgroung JPGs
     vector<glm::vec3> mounts{
@@ -667,12 +675,26 @@ int main(){
             parallaxShader.setFloat("heightScale", heightScale); // adjust with Q and E keys
             std::cout << heightScale << std::endl;
             glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuseMap);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, normalMap);
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, heightMap);
             renderQuadP();
+            
+            //normal mapping
+            normalShader.use();
+            normalShader.setMat4("projection", projection);
+            normalShader.setMat4("view", view);
+            normalShader.setMat4("model", model);
+            normalShader.setVec3("viewPos", camera.Position);
+            normalShader.setVec3("lightPos", lightPos);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            renderQuadP();
+
 
             //-----------------------------------------------
             // skybox shader setup
