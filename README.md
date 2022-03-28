@@ -15,7 +15,7 @@ Pridružite nam se i uživajte u jedinstvenom iskustvu koje pružamo-plovite oko
 
 A grupa: `Skybox` - *Jelena* , `Instancing` - *Andrijana*
 
-B grupa: `Parallax mapping` - *Jelena* , `SSAO` - *Andrijana*
+B grupa: `Parallax mapping` , `Normal mapping` - *Jelena* , `SSAO` - *Andrijana*
 
 ### Komande:
 
