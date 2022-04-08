@@ -662,17 +662,19 @@ int main(){
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
             glDisable(GL_CULL_FACE);
 
+             // parallax mapping
             parallaxShader.use();
             parallaxShader.setMat4("projection", projection);
             parallaxShader.setMat4("view", view);
             // render parallax-mapped quad
             model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(-3.0, 0.0f, 0.5f));
-            model = glm::rotate(model, glm::radians((float)glfwGetTime() * -10.0f), glm::normalize(glm::vec3(1.0, 0.0, 1.0))); // rotate the quad to show parallax mapping from multiple directions
+            model = glm::translate(model, glm::vec3(-3.4f, -0.1f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
             parallaxShader.setMat4("model", model);
             parallaxShader.setVec3("viewPos", camera.Position);
             parallaxShader.setVec3("lightPos", lightPos);
-            parallaxShader.setFloat("heightScale", heightScale); // adjust with Q and E keys
+            parallaxShader.setFloat("heightScale", heightScale);
             std::cout << heightScale << std::endl;
             glActiveTexture(GL_TEXTURE0);
             glBindTexture(GL_TEXTURE_2D, diffuseMapP);
@@ -681,8 +683,55 @@ int main(){
             glActiveTexture(GL_TEXTURE2);
             glBindTexture(GL_TEXTURE_2D, heightMap);
             renderQuadP();
-            
+
+            parallaxShader.use();
+            parallaxShader.setMat4("projection", projection);
+            parallaxShader.setMat4("view", view);
+            // render parallax-mapped quad
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-3.0f, 0.3f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            parallaxShader.setMat4("model", model);
+            parallaxShader.setVec3("viewPos", camera.Position);
+            parallaxShader.setVec3("lightPos", lightPos);
+            parallaxShader.setFloat("heightScale", heightScale);
+            std::cout << heightScale << std::endl;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, heightMap);
+            renderQuadP();
+
+            parallaxShader.use();
+            parallaxShader.setMat4("projection", projection);
+            parallaxShader.setMat4("view", view);
+            // render parallax-mapped quad
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-2.6f, -0.1f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            parallaxShader.setMat4("model", model);
+            parallaxShader.setVec3("viewPos", camera.Position);
+            parallaxShader.setVec3("lightPos", lightPos);
+            parallaxShader.setFloat("heightScale", heightScale);
+            std::cout << heightScale << std::endl;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, heightMap);
+            renderQuadP();
+
             //normal mapping
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-3.4f, -0.1f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+
             normalShader.use();
             normalShader.setMat4("projection", projection);
             normalShader.setMat4("view", view);
@@ -694,6 +743,39 @@ int main(){
             glActiveTexture(GL_TEXTURE1);
             glBindTexture(GL_TEXTURE_2D, normalMap);
             renderQuadP();
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-3.0f, 0.3f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            normalShader.use();
+            normalShader.setMat4("projection", projection);
+            normalShader.setMat4("view", view);
+            normalShader.setMat4("model", model);
+            normalShader.setVec3("viewPos", camera.Position);
+            normalShader.setVec3("lightPos", lightPos);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            renderQuadP();
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-2.6f, -0.1f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            normalShader.use();
+            normalShader.setMat4("projection", projection);
+            normalShader.setMat4("view", view);
+            normalShader.setMat4("model", model);
+            normalShader.setVec3("viewPos", camera.Position);
+            normalShader.setVec3("lightPos", lightPos);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            renderQuadP();
+
 
 
             //-----------------------------------------------
