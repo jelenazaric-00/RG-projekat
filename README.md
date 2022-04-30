@@ -15,7 +15,7 @@ Pridruzite nam se i uzivajte u jedinstvenom iskustvu koje pruzamo-plovite oko za
 
 A grupa: `Skybox` - *Jelena* , `Instancing` - *Andrijana*
 
-B grupa: `Parallax mapping` , `Normal mapping` - *Jelena* , `SSAO` - *Andrijana* , `Deffered Shading` - *Andrijana*
+B grupa: `Parallax mapping` , `Normal mapping` - *Jelena* , `SSAO` - *Andrijana* , `Deferred Shading` - *Andrijana*
 
 ### Komande:
 
@@ -27,6 +27,6 @@ B grupa: `Parallax mapping` , `Normal mapping` - *Jelena* , `SSAO` - *Andrijana*
 
 `Q` - SSAO
 
-`P` - Deffered Shading
+`P` - Deferred Shading
 
 #### Video sa demonstracijom : https://youtu.be/3eN8xEPIGh0
