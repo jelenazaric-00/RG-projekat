@@ -3,7 +3,7 @@ Projekat za kurs Računarska grafika
 
 ## Krstarenje uz društvo delfina
 
-Pridružite nam se i uživajte u jedinstvenom iskustvu koje pružamo-plovite oko zaista posebnog svetionika-njegova revolucionarna tehnologija koristi pulsirajucu plavu svetlost da doziva delfine u migraciji u svojoj blizini i omogucava vam da se približite ovim životinjama kao nikada pre. Krstarenje ima i opasnost: morate se paziti tektonske ploče u svojoj blizini koja se kroz maglu ne vidi.
+Pridruzite nam se i uzivajte u jedinstvenom iskustvu koje pruzamo-plovite oko zaista posebnog svetionika-njegova revolucionarna tehnologija koristi pulsirajucu plavu svetlost da doziva delfine u migraciji u svojoj blizini i omogucava vam da se približite ovim životinjama kao nikada pre. Krstarenje ima i opasnost: morate se paziti tektonske ploce u svojoj blizini koja se kroz maglu i u mraku ne vidi, ali i takodje "svetlecih" tektonskih ploca koje svetle samo u mraku.
 
 ### Putovanje obezbedile
 
@@ -15,7 +15,7 @@ Pridružite nam se i uživajte u jedinstvenom iskustvu koje pružamo-plovite oko
 
 A grupa: `Skybox` - *Jelena* , `Instancing` - *Andrijana*
 
-B grupa: `Parallax mapping` , `Normal mapping` - *Jelena* , `SSAO` - *Andrijana*
+B grupa: `Parallax mapping` , `Normal mapping` - *Jelena* , `SSAO` - *Andrijana* , `Deffered Shading` - *Andrijana*
 
 ### Komande:
 
@@ -26,5 +26,7 @@ B grupa: `Parallax mapping` , `Normal mapping` - *Jelena* , `SSAO` - *Andrijana*
 `B` - Blinn-Phong on/off
 
 `Q` - SSAO
+
+`P` - Deffered Shading
 
 #### Video sa demonstracijom : https://youtu.be/3eN8xEPIGh0
