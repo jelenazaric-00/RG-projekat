@@ -112,7 +112,7 @@ int main(){
     //deferred shading
     Shader shaderGeometryPassDS("resources/shaders/gBuffer.vs", "resources/shaders/gBuffer.fs");
     Shader shaderLightingPassDS("resources/shaders/deferredShading.vs", "resources/shaders/deferredShading.fs");
-
+    Shader shaderLightBox("resources/shaders/lightBox.vs","resources/shaders/lightBox.fs");
 
     // set up vertex data (and buffer(s)) and configure vertex attrib
     float transparentVertices[] = {
@@ -468,10 +468,10 @@ int main(){
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
    // lighting info
-    const unsigned int NR_LIGHTS = 32;
+    const unsigned int NR_LIGHTS = 21;
     std::vector<glm::vec3> lightPositions;
     std::vector<glm::vec3> lightColors;
-    srand(13);
+    srand(10);
     for (unsigned int i = 0; i < NR_LIGHTS; i++)
     {
         // calculate slightly random offsets
@@ -480,9 +480,9 @@ int main(){
         float zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
         lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
         // also calculate random color
-        float rColor = ((rand() % 100) / 200.0f) + 0.5;
-        float gColor = ((rand() % 100) / 200.0f) + 0.5;
-        float bColor = ((rand() % 100) / 200.0f) + 0.5;
+        float rColor = ((rand() % 20) / 100.0f) + 0.5;
+        float gColor = ((rand() % 20) / 100.0f) + 0.5;
+        float bColor = ((rand() % 100) / 200.0f) + 4.0;
         lightColors.push_back(glm::vec3(rColor, gColor, bColor));
     }
 
@@ -712,9 +712,22 @@ int main(){
             // blit to default framebuffer
             glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        }
+            
+            //render "light" quad
+            shaderLightBox.use();
+            shaderLightBox.setMat4("projection", projection);
+            shaderLightBox.setMat4("view", view);
+            for (unsigned int i = 0; i < lightPositions.size(); i++)
+            {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, lightPositions[i]);
+                model = glm::scale(model, glm::vec3(0.125f));
+                shaderLightBox.setMat4("model", model);
+                shaderLightBox.setVec3("lightColor", lightColors[i]);
+                renderQuad();
+            }
 
-        
+        }
         else {
             // lightshowShader setup
             lightShader.use();
