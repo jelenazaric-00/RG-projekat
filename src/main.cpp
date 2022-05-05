@@ -467,17 +467,19 @@ int main(){
         std::cout << "Framebuffer not complete!" << std::endl;
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
-   // lighting info
-    const unsigned int NR_LIGHTS = 21;
+  // lighting info
+    const unsigned int NR_LIGHTS = 9;
     std::vector<glm::vec3> lightPositions;
     std::vector<glm::vec3> lightColors;
-    srand(10);
+    srand(glfwGetTime());
+    offset = 2.8f;
     for (unsigned int i = 0; i < NR_LIGHTS; i++)
     {
-        // calculate slightly random offsets
-        float xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-        float yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
-        float zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+        float angle = (float)i / (float)NR_LIGHTS * 360.0f;
+        float displ = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+        float xPos = sin(angle) * r + displ;
+        float yPos = -0.55f;
+        float zPos = cos(angle) * r + displ - 2.0;
         lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
         // also calculate random color
         float rColor = ((rand() % 20) / 100.0f) + 0.5;
@@ -713,7 +715,7 @@ int main(){
             glBlitFramebuffer(0, 0, SCR_WIDTH, SCR_HEIGHT, 0, 0, SCR_WIDTH, SCR_HEIGHT, GL_DEPTH_BUFFER_BIT, GL_NEAREST);
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
             
-            //render "light" quad
+             //render "light" quad
             shaderLightBox.use();
             shaderLightBox.setMat4("projection", projection);
             shaderLightBox.setMat4("view", view);
@@ -721,10 +723,218 @@ int main(){
             {
                 model = glm::mat4(1.0f);
                 model = glm::translate(model, lightPositions[i]);
-                model = glm::scale(model, glm::vec3(0.125f));
+                model = glm::scale(model, glm::vec3(0.7f));
                 shaderLightBox.setMat4("model", model);
                 shaderLightBox.setVec3("lightColor", lightColors[i]);
                 renderQuad();
+            }
+            
+             // lightshowShader setup
+            lightShader.use();
+            lightShader.setVec3("viewPos", camera.Position);
+            lightShader.setFloat("material.shininess", 10.0f);
+            lightShader.setInt("blinn", blinn);
+            lightShader.setInt("flashLight", flashLight);
+            lightShader.setVec3("pointLightColor", 0.6, 0.8, (sin(3 * time) + 1) / 1.5);
+            // directional light setup
+            lightShader.setVec3("dirLight.direction", 1.0f, 0.5f, 0.2f);
+            lightShader.setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
+            lightShader.setVec3("dirLight.diffuse", 0.1f, 0.4f, 0.2f);
+            lightShader.setVec3("dirLight.specular", 0.8f, 0.8f, 1.0f);
+            // point light setup
+            lightShader.setVec3("pointLight.position", lighthousePosition);
+            lightShader.setVec3("pointLight.ambient", 0.01f, 0.01f, 0.02f);
+            lightShader.setVec3("pointLight.diffuse", 0.6f, 0.7f, 0.7f);
+            lightShader.setVec3("pointLight.specular", 0.6f, 0.6f, 0.6f);
+            lightShader.setFloat("pointLight.constant", 1.0f);
+            lightShader.setFloat("pointLight.linear", 0.05f);
+            lightShader.setFloat("pointLight.quadratic", 0.01f);
+            // spotlight setup
+            lightShader.setVec3("spotLight.position", glm::vec3(0.0f, 16.0f, 0.0f));
+            lightShader.setVec3("spotLight.direction", glm::vec3(0, -1, 0));
+            lightShader.setVec3("spotLight.ambient", 0.1, 0.1f, 0.4f);
+            lightShader.setVec3("spotLight.diffuse", 0.2f, 0.2f, 0.2f);
+            lightShader.setVec3("spotLight.specular", 0.3, 0.1f, 0.3f);
+            lightShader.setFloat("spotLight.constant", 0.7f);
+            lightShader.setFloat("spotLight.linear", 0.006);
+            lightShader.setFloat("spotLight.quadratic", 0.0002);
+            lightShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
+            lightShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
+
+            // view/projection transformations
+            projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT,0.1f, 100.0f);
+            view = camera.GetViewMatrix();
+            lightShader.setMat4("projection", projection);
+            lightShader.setMat4("view", view);
+
+            // floor setup - light settings
+            lightShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+            // material properties
+            lightShader.setFloat("material.shininess", 3.0f);
+
+            // floor render
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
+            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(50.0f));
+            lightShader.setMat4("model", model);
+
+            // bind diffuse map
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, floorDiffuseMap);
+            // bind specular map
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, floorSpecularMap);
+            // render floor
+            glBindVertexArray(floorVAO);
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+            glDisable(GL_CULL_FACE);
+
+            // parallax mapping
+            parallaxShader.use();
+            parallaxShader.setMat4("projection", projection);
+            parallaxShader.setMat4("view", view);
+            // render parallax-mapped quad
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-3.4f, -0.1f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            parallaxShader.setMat4("model", model);
+            parallaxShader.setVec3("viewPos", camera.Position);
+            parallaxShader.setVec3("lightPos", lightPos);
+            parallaxShader.setFloat("heightScale", heightScale);
+            std::cout << heightScale << std::endl;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, heightMap);
+            renderQuadP();
+
+            parallaxShader.use();
+            parallaxShader.setMat4("projection", projection);
+            parallaxShader.setMat4("view", view);
+            // render parallax-mapped quad
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-3.0f, 0.3f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            parallaxShader.setMat4("model", model);
+            parallaxShader.setVec3("viewPos", camera.Position);
+            parallaxShader.setVec3("lightPos", lightPos);
+            parallaxShader.setFloat("heightScale", heightScale);
+            std::cout << heightScale << std::endl;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, heightMap);
+            renderQuadP();
+
+            parallaxShader.use();
+            parallaxShader.setMat4("projection", projection);
+            parallaxShader.setMat4("view", view);
+            // render parallax-mapped quad
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-2.6f, -0.1f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            parallaxShader.setMat4("model", model);
+            parallaxShader.setVec3("viewPos", camera.Position);
+            parallaxShader.setVec3("lightPos", lightPos);
+            parallaxShader.setFloat("heightScale", heightScale);
+            std::cout << heightScale << std::endl;
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            glActiveTexture(GL_TEXTURE2);
+            glBindTexture(GL_TEXTURE_2D, heightMap);
+            renderQuadP();
+
+            //normal mapping
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-3.4f, -0.1f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+
+            normalShader.use();
+            normalShader.setMat4("projection", projection);
+            normalShader.setMat4("view", view);
+            normalShader.setMat4("model", model);
+            normalShader.setVec3("viewPos", camera.Position);
+            normalShader.setVec3("lightPos", lightPos);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            renderQuadP();
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-3.0f, 0.3f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            normalShader.use();
+            normalShader.setMat4("projection", projection);
+            normalShader.setMat4("view", view);
+            normalShader.setMat4("model", model);
+            normalShader.setVec3("viewPos", camera.Position);
+            normalShader.setVec3("lightPos", lightPos);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            renderQuadP();
+
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, glm::vec3(-2.6f, -0.1f, 1.0f));
+            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+            model = glm::scale(model, glm::vec3(0.4f));
+            normalShader.use();
+            normalShader.setMat4("projection", projection);
+            normalShader.setMat4("view", view);
+            normalShader.setMat4("model", model);
+            normalShader.setVec3("viewPos", camera.Position);
+            normalShader.setVec3("lightPos", lightPos);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
+            glActiveTexture(GL_TEXTURE1);
+            glBindTexture(GL_TEXTURE_2D, normalMap);
+            renderQuadP();
+
+            // skybox shader setup
+            glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
+            skyboxShader.use();
+            view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
+            skyboxShader.setMat4("view", view);
+            skyboxShader.setMat4("projection", projection);
+
+            // render skybox cube
+            glBindVertexArray(skyboxVAO);
+            glActiveTexture(GL_TEXTURE0);
+            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+            glDrawArrays(GL_TRIANGLES, 0, 36);
+            glBindVertexArray(0);
+            glDepthFunc(GL_LESS);
+
+            blender.use();
+            projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f,100.0f);
+            view = camera.GetViewMatrix();
+            model = glm::mat4(1.0f);
+            blender.setMat4("projection", projection);
+            blender.setMat4("view", view);
+            glBindVertexArray(transparentVAO);
+            glBindTexture(GL_TEXTURE_2D, transparentTexture);
+            for (unsigned int i = 0; i < mounts.size(); i++) {
+                model = glm::mat4(1.0f);
+                model = glm::translate(model, mounts[i]);
+                model = glm::scale(model, glm::vec3(10.0f, 6.0f, 10.5f));
+                blender.setMat4("model", model);
+                glDrawArrays(GL_TRIANGLES, 0, 6);
             }
 
         }
