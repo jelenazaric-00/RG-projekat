@@ -3,7 +3,7 @@ Projekat za kurs Računarska grafika
 
 ## Krstarenje uz društvo delfina
 
-Pridruzite nam se i uzivajte u jedinstvenom iskustvu koje pruzamo-plovite oko zaista posebnog svetionika-njegova revolucionarna tehnologija koristi pulsirajucu plavu svetlost da doziva delfine u migraciji u svojoj blizini i omogucava vam da se približite ovim životinjama kao nikada pre. Krstarenje ima i opasnost: morate se paziti tektonske ploce u svojoj blizini koja se kroz maglu i u mraku ne vidi, ali i takodje "svetlecih" tektonskih ploca koje svetle samo u mraku.
+Pridruzite nam se i uzivajte u jedinstvenom iskustvu koje pruzamo-plovite oko zaista posebnog svetionika-njegova revolucionarna tehnologija koristi pulsirajucu plavu svetlost da doziva delfine u migraciji u svojoj blizini i omogucava vam da se približite ovim životinjama kao nikada pre. Krstarenje ima i opasnost: morate se paziti tektonske ploce u svojoj blizini koja se kroz maglu ne vidi, ali i takodje "svetlecih" tektonskih ploca koje svetle samo u mraku.
 
 ### Putovanje obezbedile
 
