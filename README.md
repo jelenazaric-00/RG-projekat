@@ -25,8 +25,5 @@ B grupa: `Parallax mapping` , `Normal mapping` - *Jelena* , `SSAO` - *Andrijana*
 
 `B` - Blinn-Phong on/off
 
-`Q` - SSAO
-
-`P` - Deferred Shading
 
 #### Video sa demonstracijom : https://youtu.be/3eN8xEPIGh0
