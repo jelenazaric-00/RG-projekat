@@ -29,8 +29,6 @@ void boatMovement(Camera_Movement direction);
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-bool ssaoButton=false;
-bool DSButton=false;
 bool blinn = false;
 bool blinnKeyPressed = false;
 bool flashLight = true;
@@ -94,9 +92,7 @@ int main(){
     }
 
     glEnable(GL_DEPTH_TEST);
-    //SSAO shader
-   // Shader shaderGeometryPass("resources/shaders/ssao_geometry.vs", "resources/shaders/ssao_geometry.fs");
-    //Shader shaderLightingPass("resources/shaders/ssao.vs", "resources/shaders/ssao_lighting.fs");
+
     Shader shaderSSAO("resources/shaders/ssao.vs", "resources/shaders/ssao.fs");
     Shader shaderSSAOBlur("resources/shaders/ssao.vs", "resources/shaders/ssao_blur.fs");
     //shaders
@@ -109,7 +105,6 @@ int main(){
     //normal mapping
     Shader normalShader("resources/shaders/normal_mapping.vs", "resources/shaders/normal_mapping.fs");
     
-    //deferred shading
     Shader shaderGeometryPassDS("resources/shaders/gBuffer.vs", "resources/shaders/gBuffer.fs");
     Shader shaderLightingPassDS("resources/shaders/deferredShading.vs", "resources/shaders/deferredShading.fs");
     Shader shaderLightBox("resources/shaders/lightBox.vs","resources/shaders/lightBox.fs");
@@ -313,124 +308,11 @@ int main(){
         model = glm::rotate(model, rotFor , glm::vec3(-0.1f, 1.0f, 0.1f));
         modelMatrices[i] = model;
     }
-    /*
-    unsigned int gBuffer;
-    glGenFramebuffers(1, &gBuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, gBuffer);
-    unsigned int gPosition, gNormal, gAlbedo;
-    // position color buffer
-    glGenTextures(1, &gPosition);
-    glBindTexture(GL_TEXTURE_2D, gPosition);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, gPosition, 0);
-    // normal color buffer
-    glGenTextures(1, &gNormal);
-    glBindTexture(GL_TEXTURE_2D, gNormal);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, GL_TEXTURE_2D, gNormal, 0);
-    // color + specular color buffer
-    glGenTextures(1, &gAlbedo);
-    glBindTexture(GL_TEXTURE_2D, gAlbedo);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, SCR_WIDTH, SCR_HEIGHT, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT2, GL_TEXTURE_2D, gAlbedo, 0);
-    // tell OpenGL which color attachments we'll use (of this framebuffer) for rendering
-    unsigned int attachments[3] = { GL_COLOR_ATTACHMENT0, GL_COLOR_ATTACHMENT1, GL_COLOR_ATTACHMENT2 };
-    glDrawBuffers(3, attachments);
-    // create and attach depth buffer (renderbuffer)
-    unsigned int rboDepth;
-    glGenRenderbuffers(1, &rboDepth);
-    glBindRenderbuffer(GL_RENDERBUFFER, rboDepth);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, SCR_WIDTH, SCR_HEIGHT);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, rboDepth);
-    // then check if framebuffer is complete
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "Framebuffer not complete!" << std::endl;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    // also create framebuffer to hold SSAO processing stage
-    // -----------------------------------------------------
-    unsigned int ssaoFBO, ssaoBlurFBO;
-    glGenFramebuffers(1, &ssaoFBO);  glGenFramebuffers(1, &ssaoBlurFBO);
-    glBindFramebuffer(GL_FRAMEBUFFER, ssaoFBO);
-    unsigned int ssaoColorBuffer, ssaoColorBufferBlur;
-    // SSAO color buffer
-    glGenTextures(1, &ssaoColorBuffer);
-    glBindTexture(GL_TEXTURE_2D, ssaoColorBuffer);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBuffer, 0);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "SSAO Framebuffer not complete!" << std::endl;
-    // and blur stage
-    glBindFramebuffer(GL_FRAMEBUFFER, ssaoBlurFBO);
-    glGenTextures(1, &ssaoColorBufferBlur);
-    glBindTexture(GL_TEXTURE_2D, ssaoColorBufferBlur);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RED, SCR_WIDTH, SCR_HEIGHT, 0, GL_RED, GL_FLOAT, NULL);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, ssaoColorBufferBlur, 0);
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-        std::cout << "SSAO Blur Framebuffer not complete!" << std::endl;
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    std::uniform_real_distribution<GLfloat> randomFloats(0.0, 1.0); // generates random floats between 0.0 and 1.0
-    std::default_random_engine generator;
-    std::vector<glm::vec3> ssaoKernel;
-    for (unsigned int i = 0; i < 64; ++i){
-        glm::vec3 sample(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, randomFloats(generator));
-        sample = glm::normalize(sample);
-        sample *= randomFloats(generator);
-        float scale = float(i) / 64.0;
-        // scale samples s.t. they're more aligned to center of kernel
-        scale = lerp(0.1f, 1.0f, scale * scale);
-        sample *= scale;
-        ssaoKernel.push_back(sample);
-    }
-    // generate noise texture
-    // ----------------------
-    std::vector<glm::vec3> ssaoNoise;
-    for (unsigned int i = 0; i < 16; i++){
-        glm::vec3 noise(randomFloats(generator) * 2.0 - 1.0, randomFloats(generator) * 2.0 - 1.0, 0.0f); // rotate around z-axis (in tangent space)
-        ssaoNoise.push_back(noise);
-    }
-    unsigned int noiseTexture; glGenTextures(1, &noiseTexture);
-    glBindTexture(GL_TEXTURE_2D, noiseTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F, 4, 4, 0, GL_RGB, GL_FLOAT, &ssaoNoise[0]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // lighting info
-    // -------------
-    glm::vec3 lightPos = glm::vec3(0.0, 3.0, -1.5);
-    glm::vec3 lightColor = glm::vec3(0.2f, 0.2f, 0.7f);
-
-    // shader configuration
-    // --------------------
-    shaderLightingPassDS.use();
-    shaderLightingPassDS.setInt("gPosition", 0);
-    shaderLightingPassDS.setInt("gNormal", 1);
-    shaderLightingPassDS.setInt("gAlbedo", 2);
-    shaderLightingPassDS.setInt("ssao", 3);
-    shaderSSAO.use();
-    shaderSSAO.setInt("gPosition", 0);
-    shaderSSAO.setInt("gNormal", 1);
-    shaderSSAO.setInt("texNoise", 2);
-    shaderSSAOBlur.use();
-    shaderSSAOBlur.setInt("ssaoInput", 0);
-    */
+    
 
     glm::vec3 lightPos = glm::vec3(0.0,3.0,-1.5);
 
-     //deferred shading
+     //deferred shading and SSAO
     // configure g-buffer framebuffer
     unsigned int gBufferDS;
     glGenFramebuffers(1, &gBufferDS);
@@ -939,268 +821,6 @@ int main(){
                 glDrawArrays(GL_TRIANGLES, 0, 6);
             }
 
-/*        else {
-            // lightshowShader setup
-            lightShader.use();
-            lightShader.setVec3("viewPos", camera.Position);
-            lightShader.setFloat("material.shininess", 10.0f);
-            lightShader.setInt("blinn", blinn);
-            lightShader.setInt("flashLight", flashLight);
-            lightShader.setVec3("pointLightColor", 0.6, 0.8, (sin(3 * time) + 1) / 1.5);
-            // directional light setup
-            lightShader.setVec3("dirLight.direction", 1.0f, 0.5f, 0.2f);
-            lightShader.setVec3("dirLight.ambient", 0.5f, 0.5f, 0.5f);
-            lightShader.setVec3("dirLight.diffuse", 0.1f, 0.4f, 0.2f);
-            lightShader.setVec3("dirLight.specular", 0.8f, 0.8f, 1.0f);
-            // point light setup
-            lightShader.setVec3("pointLight.position", lighthousePosition);
-            lightShader.setVec3("pointLight.ambient", 0.01f, 0.01f, 0.02f);
-            lightShader.setVec3("pointLight.diffuse", 0.6f, 0.7f, 0.7f);
-            lightShader.setVec3("pointLight.specular", 0.6f, 0.6f, 0.6f);
-            lightShader.setFloat("pointLight.constant", 1.0f);
-            lightShader.setFloat("pointLight.linear", 0.05f);
-            lightShader.setFloat("pointLight.quadratic", 0.01f);
-            // spotlight setup
-            lightShader.setVec3("spotLight.position", glm::vec3(0.0f, 16.0f, 0.0f));
-            lightShader.setVec3("spotLight.direction", glm::vec3(0, -1, 0));
-            lightShader.setVec3("spotLight.ambient", 0.1, 0.1f, 0.4f);
-            lightShader.setVec3("spotLight.diffuse", 0.2f, 0.2f, 0.2f);
-            lightShader.setVec3("spotLight.specular", 0.3, 0.1f, 0.3f);
-            lightShader.setFloat("spotLight.constant", 0.7f);
-            lightShader.setFloat("spotLight.linear", 0.006);
-            lightShader.setFloat("spotLight.quadratic", 0.0002);
-            lightShader.setFloat("spotLight.cutOff", glm::cos(glm::radians(10.0f)));
-            lightShader.setFloat("spotLight.outerCutOff", glm::cos(glm::radians(15.0f)));
-
-            // view/projection transformations
-            glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT,0.1f, 100.0f);
-            glm::mat4 view = camera.GetViewMatrix();
-            lightShader.setMat4("projection", projection);
-            lightShader.setMat4("view", view);
-
-            // tails render
-            glm::mat4 model(1.0f);
-            for (unsigned int i = 0; i < amt; i++) {
-                lightShader.setMat4("model", modelMatrices[i]);
-                tail.Draw(lightShader);
-            }
-*/
-            // lightHouse - material settings
-           // lightShader.setFloat("material.shininess", 0.8f);
-            // lighthouse render
-            //model = glm::mat4(1.0f);
-            //model = glm::translate(model, lighthousePosition);
-            //model = glm::rotate(model, /*time / 4*/glm::radians(10.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            //model = glm::scale(model, glm::vec3(0.4f));
-            /*lightShader.setMat4("model", model);
-            lightHouse.Draw(lightShader);
-
-            // rocks render
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(4, 0, -3));
-            model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0, 1, 0));
-            model = glm::scale(model, glm::vec3(1.8f));
-            lightShader.setMat4("model", model);
-            rocks.Draw(lightShader);
-
-            // big tail render
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, bigTailPosition);
-            model = glm::rotate(model, glm::radians(15.0f), glm::vec3(0, 1, -0.5));
-            model = glm::scale(model, glm::vec3(0.1f));
-            lightShader.setMat4("model", model);
-            tail.Draw(lightShader);
-
-            //boat render
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, boatPosition);
-            if (front) {
-                model = glm::rotate(model, glm::radians(180.0f), glm::vec3(0.0, 1.0, 0.0));
-            }
-            if (go_left) {
-                model = glm::rotate(model, glm::radians(-90.0f), glm::vec3(0.0, 1.0, 0.0));
-            }
-            if (go_right) {
-                model = glm::rotate(model, glm::radians(90.0f), glm::vec3(0.0, 1.0, 0.0));
-            }
-            model = glm::scale(model, glm::vec3(0.02));
-            lightShader.setMat4("model", model);
-            Boat.Draw(lightShader);
-
-            // floor setup - light settings
-            lightShader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
-            // material properties
-            lightShader.setFloat("material.shininess", 3.0f);
-
-            // floor render
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(0.0f, -0.5f, 0.0f));
-            model = glm::rotate(model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(50.0f));
-            lightShader.setMat4("model", model);
-
-            // bind diffuse map
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, floorDiffuseMap);
-            // bind specular map
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, floorSpecularMap);
-            // render floor
-            glBindVertexArray(floorVAO);
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
-            glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
-            glDisable(GL_CULL_FACE);
-
-             // parallax mapping
-            parallaxShader.use();
-            parallaxShader.setMat4("projection", projection);
-            parallaxShader.setMat4("view", view);
-            // render parallax-mapped quad
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(-3.4f, -0.1f, 1.0f));
-            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(0.4f));
-            parallaxShader.setMat4("model", model);
-            parallaxShader.setVec3("viewPos", camera.Position);
-            parallaxShader.setVec3("lightPos", lightPos);
-            parallaxShader.setFloat("heightScale", heightScale);
-            std::cout << heightScale << std::endl;
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, normalMap);
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, heightMap);
-            renderQuadP();
-
-            parallaxShader.use();
-            parallaxShader.setMat4("projection", projection);
-            parallaxShader.setMat4("view", view);
-            // render parallax-mapped quad
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(-3.0f, 0.3f, 1.0f));
-            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(0.4f));
-            parallaxShader.setMat4("model", model);
-            parallaxShader.setVec3("viewPos", camera.Position);
-            parallaxShader.setVec3("lightPos", lightPos);
-            parallaxShader.setFloat("heightScale", heightScale);
-            std::cout << heightScale << std::endl;
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, normalMap);
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, heightMap);
-            renderQuadP();
-
-            parallaxShader.use();
-            parallaxShader.setMat4("projection", projection);
-            parallaxShader.setMat4("view", view);
-            // render parallax-mapped quad
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(-2.6f, -0.1f, 1.0f));
-            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(0.4f));
-            parallaxShader.setMat4("model", model);
-            parallaxShader.setVec3("viewPos", camera.Position);
-            parallaxShader.setVec3("lightPos", lightPos);
-            parallaxShader.setFloat("heightScale", heightScale);
-            std::cout << heightScale << std::endl;
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, normalMap);
-            glActiveTexture(GL_TEXTURE2);
-            glBindTexture(GL_TEXTURE_2D, heightMap);
-            renderQuadP();
-
-            //normal mapping
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(-3.4f, -0.1f, 1.0f));
-            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(0.4f));
-
-            normalShader.use();
-            normalShader.setMat4("projection", projection);
-            normalShader.setMat4("view", view);
-            normalShader.setMat4("model", model);
-            normalShader.setVec3("viewPos", camera.Position);
-            normalShader.setVec3("lightPos", lightPos);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, normalMap);
-            renderQuadP();
-
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(-3.0f, 0.3f, 1.0f));
-            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(0.4f));
-            normalShader.use();
-            normalShader.setMat4("projection", projection);
-            normalShader.setMat4("view", view);
-            normalShader.setMat4("model", model);
-            normalShader.setVec3("viewPos", camera.Position);
-            normalShader.setVec3("lightPos", lightPos);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, normalMap);
-            renderQuadP();
-
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, glm::vec3(-2.6f, -0.1f, 1.0f));
-            model = glm ::rotate (model, glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-            model = glm::scale(model, glm::vec3(0.4f));
-            normalShader.use();
-            normalShader.setMat4("projection", projection);
-            normalShader.setMat4("view", view);
-            normalShader.setMat4("model", model);
-            normalShader.setVec3("viewPos", camera.Position);
-            normalShader.setVec3("lightPos", lightPos);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, diffuseMapP);
-            glActiveTexture(GL_TEXTURE1);
-            glBindTexture(GL_TEXTURE_2D, normalMap);
-            renderQuadP();
-
-
-
-            //-----------------------------------------------
-            // skybox shader setup
-            glDepthFunc(GL_LEQUAL);  // change depth function so depth test passes when values are equal to depth buffer's content
-            skyboxShader.use();
-            view = glm::mat4(glm::mat3(camera.GetViewMatrix()));
-            skyboxShader.setMat4("view", view);
-            skyboxShader.setMat4("projection", projection);
-
-            // render skybox cube
-            glBindVertexArray(skyboxVAO);
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-            glDrawArrays(GL_TRIANGLES, 0, 36);
-            glBindVertexArray(0);
-            glDepthFunc(GL_LESS);
-
-            blender.use();
-            projection = glm::perspective(glm::radians(camera.Zoom), (float) SCR_WIDTH / (float) SCR_HEIGHT, 0.1f,100.0f);
-            view = camera.GetViewMatrix();
-            model = glm::mat4(1.0f);
-            blender.setMat4("projection", projection);
-            blender.setMat4("view", view);
-            glBindVertexArray(transparentVAO);
-            glBindTexture(GL_TEXTURE_2D, transparentTexture);
-            for (unsigned int i = 0; i < mounts.size(); i++) {
-                model = glm::mat4(1.0f);
-                model = glm::translate(model, mounts[i]);
-                model = glm::scale(model, glm::vec3(10.0f, 6.0f, 10.5f));
-                blender.setMat4("model", model);
-                glDrawArrays(GL_TRIANGLES, 0, 6);
-            }
-    }
-    */
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
         glfwSwapBuffers(window);
         glfwPollEvents();
@@ -1269,18 +889,6 @@ void processInput(GLFWwindow *window) {
         blinnKeyPressed = false;
     }
 
-    if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS){
-        ssaoButton=true;
-    }
-    if(glfwGetKey(window, GLFW_KEY_Q) == GLFW_RELEASE){
-        ssaoButton=false;
-    }
-    if(glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS){
-        DSButton=true;
-    }
-    if(glfwGetKey(window, GLFW_KEY_P) == GLFW_RELEASE){
-        DSButton=false;
-    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
