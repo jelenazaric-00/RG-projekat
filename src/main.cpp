@@ -412,7 +412,7 @@ int main(){
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
   // lighting info
-    const unsigned int NR_LIGHTS = 32;
+    const unsigned int NR_LIGHTS = 101;
     std::vector<glm::vec3> lightPositions;
     std::vector<glm::vec3> lightPositionsBox;
     std::vector<glm::vec3> lightColors;
@@ -421,15 +421,17 @@ int main(){
 
     for (unsigned int i = 0; i < NR_LIGHTS; i++)
     {
-        float angle = (float)i / (float)NR_LIGHTS * 360.0f;
-        float displ = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
-        float xPos = sin(angle) * r + displ;
-        float yPos = -0.55f;
-        float zPos = cos(angle) * r + displ - 2.0;
-        lightPositionsBox.push_back(glm::vec3(xPos, yPos, zPos));
-        xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
-        yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
-        zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+        if(i < 32){
+            float angle = (float)i / 32.0f * 360.0f;
+            float displ = (rand() % (int)(2 * offset * 100)) / 100.0f - offset;
+            float xPos = sin(angle) * r + displ;
+            float yPos = -0.55f;
+            float zPos = cos(angle) * r + displ - 2.0;
+            lightPositionsBox.push_back(glm::vec3(xPos, yPos, zPos));
+        }
+        float xPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
+        float yPos = ((rand() % 100) / 100.0) * 6.0 - 4.0;
+        float zPos = ((rand() % 100) / 100.0) * 6.0 - 3.0;
         lightPositions.push_back(glm::vec3(xPos, yPos, zPos));
         // also calculate random color
         float rColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
@@ -437,8 +439,6 @@ int main(){
         float bColor = ((rand() % 100) / 200.0f) + 0.5; // between 0.5 and 1.0
         lightColors.push_back(glm::vec3(rColor, gColor, bColor));
     }
-
-
  
     // shader configuration
     shaderLightingPassDS.use();
@@ -506,18 +506,6 @@ int main(){
             model = glm::scale(model, glm::vec3(0.02f));
             shaderGeometryPassDS.setMat4("model", model);
             Boat.Draw(shaderGeometryPassDS);
-
-            for (unsigned int i = 0; i < amt; i++) {
-                shaderGeometryPassDS.setMat4("model", modelMatrices[i]);
-                tail.Draw(shaderGeometryPassDS);
-            }
-            //big tail render
-            model = glm::mat4(1.0f);
-            model = glm::translate(model, bigTailPosition);
-            model = glm::rotate(model, glm::radians(15.0f), glm::vec3(0, 1, -0.5));
-            model = glm::scale(model, glm::vec3(0.1f));
-            shaderGeometryPassDS.setMat4("model", model);
-            tail.Draw(shaderGeometryPassDS);
 
             glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
@@ -668,6 +656,19 @@ int main(){
             glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
             glDisable(GL_CULL_FACE);
 
+            
+            for (unsigned int i = 0; i < amt; i++) {
+                lightShader.setMat4("model", modelMatrices[i]);
+                tail.Draw(lightShader);
+            }
+            //big tail render
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, bigTailPosition);
+            model = glm::rotate(model, glm::radians(15.0f), glm::vec3(0, 1, -0.5));
+            model = glm::scale(model, glm::vec3(0.1f));
+            lightShader.setMat4("model", model);
+            tail.Draw(lightShader);
+        
             // parallax mapping
             parallaxShader.use();
             parallaxShader.setMat4("projection", projection);
